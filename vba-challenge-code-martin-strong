@@ -1,0 +1,91 @@
+Sub stock_performance()
+
+' Set variables
+Dim ticker As String
+Dim open_price As Double
+    open_price = 0
+Dim close_price As Integer
+Dim volume As Double
+    volume = 0
+Dim yearly_change As Double
+    yearly_change = 0
+Dim percent_change As Double
+    percent_change = 0
+Dim ws As Worksheet
+    
+Dim Summary_Table_Row As Integer
+Summary_Table_Row = 2
+
+' Programmically cound number of rows
+lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+
+    'Loop through worksheets
+    For Each ws In Worksheets
+    
+    'Define where to start for open price
+    open_price = ws.Cells(2, 3).Value
+    
+        'Loop through each row
+        For i = 2 To lastrow
+        
+            'Check to see if same ticker, if it is not...
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+                
+                'Set the ticker name
+                ticker = ws.Cells(i, 1).Value
+                
+                 'Calculate yearly change
+                close_price = ws.Cells(i, 6).Value
+                yearly_change = close_price - open_price
+                
+                'Print yearly change in summary table
+                ws.Range("J" & Summary_Table_Row).Value = yearly_change
+
+                        'Conditional Format(red Is loss, green Is gain)
+                        If yearly_change >= 0 Then
+
+                            'Color green for gain
+                            ws.Cells(Summary_Table_Row, 10).Interior.ColorIndex = 4
+
+                            'If not, red for loss
+                            ElseIf yearly_change < 0 Then
+                            ws.Cells(Summary_Table_Row, 10).Interior.ColorIndex = 3
+
+                        End If
+                
+                'Calculate % change
+                percent_change = (yearly_change / open_price)
+                
+                'Print percent change
+                ws.Range("K" & Summary_Table_Row).Value = percent_change
+                
+                'Set new open price for next ticker
+                open_price = ws.Cells(i + 1, 3).Value
+                            
+                'Add to volume total
+                volume = volume + ws.Cells(i, 7).Value
+                
+                'Print ticker name in Summary table
+                ws.Range("I" & Summary_Table_Row).Value = ticker
+                
+                'Print volume in Summary table
+                ws.Range("L" & Summary_Table_Row).Value = volume
+                
+                'Add one to the summary table row
+                Summary_Table_Row = Summary_Table_Row + 1
+                
+                'Reset volume
+                volume = 0
+                
+            'If the cell immediately following a row is the same ticker...
+            Else
+                'Add to the volume
+                volume = volume + ws.Cells(i, 7).Value
+            
+            End If
+        
+        Next i
+    
+    Next ws
+
+ End Sub
